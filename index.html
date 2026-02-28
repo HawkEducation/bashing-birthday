@@ -21,6 +21,7 @@
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
         .pulse { animation: pulse 0.7s infinite ease-in-out; color: var(--gold); }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .small-link { font-size: 9px; color: #555; text-decoration: none; margin-top: 5px; cursor: pointer; }
     </style>
 </head>
 <body onclick="createConfetti(event)">
@@ -28,7 +29,7 @@
 <canvas id="canvas"></canvas>
 
 <div id="player-container">
-    <iframe id="main-player" width="220" height="125" src="https://www.youtube.com/embed/S_7UvY7OidU?enablejsapi=1&origin=https://hawkeducation.github.io" frameborder="0" allow="autoplay; encrypted-media"></iframe>
+    <iframe id="main-player" width="220" height="125" src="https://www.youtube.com/embed/S_7UvY7OidU?enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>
 </div>
 
 <div id="clock-container">
@@ -39,7 +40,7 @@
         <label style="font-size: 10px; color: #666;">BIRTHDAY (MM/DD)</label>
         <input type="text" id="bday-input" placeholder="03/03" maxlength="5">
         <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
-        <div style="font-size: 9px; color: #444; margin-top: 5px;">Music stuck? Tap the video window!</div>
+        <div class="small-link" onclick="swapTrack()">Video Dead? Click to Swap Version</div>
     </div>
 </div>
 
@@ -47,9 +48,19 @@
     let partyMode = false;
     const bdayInput = document.getElementById('bday-input');
     const player = document.getElementById('main-player');
+    
+    // List of backup Paso Bem Solto videos
+    const tracks = ["S_7UvY7OidU", "V1Pl8CzNzCw", "vM8_8v-o-X0"];
+    let trackIndex = 0;
 
     bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
     bdayInput.oninput = () => { if(bdayInput.value.length === 5) localStorage.setItem('userBirthday', bdayInput.value); };
+
+    function swapTrack() {
+        trackIndex = (trackIndex + 1) % tracks.length;
+        player.src = `https://www.youtube.com/embed/${tracks[trackIndex]}?enablejsapi=1&autoplay=1`;
+        if(!partyMode) toggleParty();
+    }
 
     function toggleParty() {
         partyMode = !partyMode;
@@ -57,7 +68,6 @@
         const container = document.getElementById('clock-container');
         
         if(partyMode) {
-            // Sends the play command to the iframe
             player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
             container.classList.add('party-on');
             btn.classList.add('btn-active');
@@ -86,7 +96,6 @@
         if (currentMMDD === userBday) {
             msgArea.innerText = "🎂 HAPPY BIRTHDAY! 🎂";
             msgArea.classList.add('pulse');
-            countArea.innerText = "PHONK DAY IS LIVE";
         } else {
             msgArea.innerText = partyMode ? "PASO BEM SOLTO" : "BASHING SOON";
             if(partyMode) msgArea.classList.add('pulse');
