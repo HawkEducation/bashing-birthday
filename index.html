@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashing Birthday - Private Press</title>
+    <title>Bashing Birthday - Scratch Mode</title>
     <style>
         :root { --gold: #d4af37; --matrix: #00ff00; --bg: #0a0a0a; }
         body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; }
@@ -22,10 +22,6 @@
 
         .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 15px; }
         
-        .file-label { font-size: 12px; color: var(--gold); cursor: pointer; border: 1px dashed var(--gold); padding: 10px; border-radius: 10px; transition: 0.3s; }
-        .file-label:hover { background: rgba(212, 175, 55, 0.1); }
-        #file-input { display: none; }
-
         input[type="text"] { background: #222; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; font-family: inherit; width: 100px; text-align: center; margin: 0 auto; outline: none; }
         
         .toggle-btn { 
@@ -36,57 +32,44 @@
 
         .btn-active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+        .small-note { font-size: 10px; color: #555; margin-top: 5px; }
     </style>
 </head>
 <body onclick="createConfetti(event)">
 
 <canvas id="canvas"></canvas>
-<audio id="phonk-audio" loop></audio>
+
+<audio id="phonk-audio" loop crossorigin="anonymous">
+    <source src="https://assets.scratch.mit.edu/internalapi/asset/709145601289133b6680370000000000.wav/get/" type="audio/wav">
+</audio>
 
 <div id="clock-container">
     <div id="time-display">00:00:00</div>
-    <div id="msg-area">SILENCE BANNED</div>
+    <div id="msg-area">SCRATCH MODE ACTIVE</div>
     
     <div class="controls" onclick="event.stopPropagation()">
-        <label class="file-label" for="file-input">📂 CLICK TO SELECT YOUR RECORDING</label>
-        <input type="file" id="file-input" accept="audio/*">
-        
         <input type="text" id="bday-input" placeholder="03/03" maxlength="5">
-        <button id="party-toggle" class="toggle-btn">ACTIVATE PHONK 😈</button>
+        <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
+        <div class="small-note">Click background once if silent!</div>
     </div>
 </div>
 
 <script>
     let partyMode = false;
     const audio = document.getElementById('phonk-audio');
-    const fileInput = document.getElementById('file-input');
-    const btn = document.getElementById('party-toggle');
     const bdayInput = document.getElementById('bday-input');
 
+    // Load saved birthday
     bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
     bdayInput.oninput = () => { if(bdayInput.value.length === 5) localStorage.setItem('userBirthday', bdayInput.value); };
 
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            audio.src = URL.createObjectURL(file);
-            document.querySelector('.file-label').innerText = "✅ RECORDING LOADED";
-            document.querySelector('.file-label').style.borderColor = "var(--matrix)";
-            document.querySelector('.file-label').style.color = "var(--matrix)";
-        }
-    };
-
-    btn.onclick = () => {
-        if (!audio.src) {
-            alert("Please select your recording first!");
-            return;
-        }
-        
+    function toggleParty() {
         partyMode = !partyMode;
+        const btn = document.getElementById('party-toggle');
         const container = document.getElementById('clock-container');
         
         if(partyMode) {
-            audio.play();
+            audio.play().catch(e => console.log("User interaction needed"));
             container.classList.add('party-on');
             btn.classList.add('btn-active');
             btn.innerText = "STOP THE PHONK 🛑";
@@ -96,7 +79,7 @@
             btn.classList.remove('btn-active');
             btn.innerText = "ACTIVATE PHONK 😈";
         }
-    };
+    }
 
     function update() {
         const now = new Date();
@@ -108,12 +91,14 @@
         }
     }
 
+    // --- CONFETTI ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.onresize = resize; resize();
     function createConfetti(e) {
+        if(partyMode && audio.paused) audio.play(); // Wake up audio on click
         for(let i=0; i<20; i++) {
             particles.push({
                 x: e.clientX, y: e.clientY,
