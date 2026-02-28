@@ -3,60 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashing Birthday - Phonk Edition</title>
+    <title>Bashing Birthday - Private Press</title>
     <style>
         :root { --gold: #d4af37; --matrix: #00ff00; --bg: #0a0a0a; }
         body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; }
-        #clock-container { padding: 40px; border: 3px solid #333; border-radius: 25px; text-align: center; background: #151515; transition: all 0.1s ease; z-index: 10; min-width: 380px; }
+        
+        #clock-container { 
+            padding: 40px; border: 3px solid #333; border-radius: 25px; 
+            text-align: center; background: #151515; transition: all 0.1s ease; 
+            z-index: 10; min-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
         #time-display { font-weight: bold; font-size: clamp(40px, 12vw, 85px); margin: 10px 0; color: var(--matrix); text-shadow: 0 0 15px rgba(0,255,0,0.2); }
         #msg-area { font-size: 26px; font-weight: bold; height: 40px; margin-bottom: 10px; text-transform: uppercase; }
-        #countdown-display { font-size: 16px; color: #ff9f43; margin-bottom: 20px; }
+
         .party-on { border-color: var(--gold) !important; background-color: #1a1608 !important; box-shadow: 0 0 80px rgba(212, 175, 55, 0.4) !important; }
         .party-on #time-display { color: var(--gold) !important; text-shadow: 0 0 25px rgba(212, 175, 55, 0.6) !important; }
-        .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 12px; }
-        input { background: #222; color: white; border: 1px solid var(--gold); padding: 8px; border-radius: 5px; font-family: inherit; width: 100px; text-align: center; margin: 0 auto; outline: none; }
-        .toggle-btn { background: #333; color: white; border: none; padding: 15px 30px; font-family: inherit; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; font-size: 14px; }
+
+        .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 15px; }
+        
+        .file-label { font-size: 12px; color: var(--gold); cursor: pointer; border: 1px dashed var(--gold); padding: 10px; border-radius: 10px; transition: 0.3s; }
+        .file-label:hover { background: rgba(212, 175, 55, 0.1); }
+        #file-input { display: none; }
+
+        input[type="text"] { background: #222; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; font-family: inherit; width: 100px; text-align: center; margin: 0 auto; outline: none; }
+        
+        .toggle-btn { 
+            background: #333; color: white; border: none; padding: 15px 30px; 
+            font-family: inherit; font-weight: bold; border-radius: 50px; 
+            cursor: pointer; transition: 0.3s; font-size: 14px;
+        }
+
         .btn-active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
-        .pulse { animation: pulse 0.7s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     </style>
 </head>
 <body onclick="createConfetti(event)">
 
 <canvas id="canvas"></canvas>
-
-<audio id="phonk-audio" loop>
-    <source src="https://files.catbox.moe/mvevpe.mp3" type="audio/mpeg">
-</audio>
+<audio id="phonk-audio" loop></audio>
 
 <div id="clock-container">
     <div id="time-display">00:00:00</div>
-    <div id="msg-area">READY TO BASH</div>
-    <div id="countdown-display">SET BIRTHDAY BELOW</div>
+    <div id="msg-area">SILENCE BANNED</div>
+    
     <div class="controls" onclick="event.stopPropagation()">
-        <label style="font-size: 10px; color: #666;">BIRTHDAY (MM/DD)</label>
+        <label class="file-label" for="file-input">📂 CLICK TO SELECT YOUR RECORDING</label>
+        <input type="file" id="file-input" accept="audio/*">
+        
         <input type="text" id="bday-input" placeholder="03/03" maxlength="5">
-        <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
+        <button id="party-toggle" class="toggle-btn">ACTIVATE PHONK 😈</button>
     </div>
 </div>
-<p>You may have to click the background once before playing phonk.</p>
 
 <script>
     let partyMode = false;
-    const bdayInput = document.getElementById('bday-input');
     const audio = document.getElementById('phonk-audio');
+    const fileInput = document.getElementById('file-input');
+    const btn = document.getElementById('party-toggle');
+    const bdayInput = document.getElementById('bday-input');
 
     bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
     bdayInput.oninput = () => { if(bdayInput.value.length === 5) localStorage.setItem('userBirthday', bdayInput.value); };
 
-    function toggleParty() {
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            audio.src = URL.createObjectURL(file);
+            document.querySelector('.file-label').innerText = "✅ RECORDING LOADED";
+            document.querySelector('.file-label').style.borderColor = "var(--matrix)";
+            document.querySelector('.file-label').style.color = "var(--matrix)";
+        }
+    };
+
+    btn.onclick = () => {
+        if (!audio.src) {
+            alert("Please select your recording first!");
+            return;
+        }
+        
         partyMode = !partyMode;
-        const btn = document.getElementById('party-toggle');
         const container = document.getElementById('clock-container');
         
         if(partyMode) {
-            audio.play().catch(e => alert("Click the screen first to enable audio!"));
+            audio.play();
             container.classList.add('party-on');
             btn.classList.add('btn-active');
             btn.innerText = "STOP THE PHONK 🛑";
@@ -66,39 +96,15 @@
             btn.classList.remove('btn-active');
             btn.innerText = "ACTIVATE PHONK 😈";
         }
-    }
+    };
 
     function update() {
         const now = new Date();
-        const container = document.getElementById('clock-container');
-        if (partyMode) {
-            container.style.transform = "scale(1.05)";
-            setTimeout(() => { container.style.transform = "scale(1)"; }, 70);
-        }
         document.getElementById('time-display').innerText = now.toLocaleTimeString('en-GB');
-        const currentMMDD = (now.getMonth() + 1).toString().padStart(2, '0') + '/' + now.getDate().toString().padStart(2, '0');
-        const userBday = bdayInput.value;
-        const msgArea = document.getElementById('msg-area');
-        const countArea = document.getElementById('countdown-display');
-
-        if (currentMMDD === userBday) {
-            msgArea.innerText = "🎂 HAPPY BIRTHDAY! 🎂";
-            msgArea.classList.add('pulse');
-        } else {
-            msgArea.innerText = partyMode ? "PASO BEM SOLTO" : "BASHING SOON";
-            if(partyMode) msgArea.classList.add('pulse');
-            else msgArea.classList.remove('pulse');
-            if(userBday.length === 5) {
-                const [m, d] = userBday.split('/');
-                let target = new Date(now.getFullYear(), m-1, d);
-                if (target < now) target.setFullYear(now.getFullYear() + 1);
-                const diff = target - now;
-                const days = Math.floor(diff / 86400000);
-                const hrs = Math.floor((diff / 3600000) % 24);
-                const mins = Math.floor((diff / 60000) % 60);
-                const secs = Math.floor((diff / 1000) % 60);
-                countArea.innerText = `COUNTDOWN: ${days}d ${hrs}h ${mins}m ${secs}s`;
-            }
+        
+        if (partyMode) {
+            document.getElementById('clock-container').style.transform = "scale(1.05)";
+            setTimeout(() => { document.getElementById('clock-container').style.transform = "scale(1)"; }, 70);
         }
     }
 
@@ -129,7 +135,6 @@
         requestAnimationFrame(animate);
     }
     setInterval(update, 1000);
-    update();
     animate();
 </script>
 </body>
