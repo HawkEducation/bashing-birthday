@@ -3,82 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashing Birthday - Phonk Edition</title>
+    <title>Bashing Birthday - Paso Bem Solto</title>
     <style>
-        :root {
-            --gold: #d4af37;
-            --matrix: #00ff00;
-            --bg: #0a0a0a;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
-        }
-
-        #clock-container {
-            padding: 40px;
-            border: 3px solid #333;
-            border-radius: 25px;
-            text-align: center;
-            background: #151515;
-            transition: all 0.4s ease;
-            position: relative;
-            z-index: 10;
-            min-width: 380px;
-        }
-
-        #time-display {
-            font-weight: bold;
-            font-size: clamp(40px, 12vw, 90px);
-            margin: 10px 0;
-            color: var(--matrix);
-            text-shadow: 0 0 15px rgba(0,255,0,0.2);
-        }
-
-        #birthday-msg { font-size: 28px; font-weight: bold; height: 40px; margin-bottom: 10px; }
+        :root { --gold: #d4af37; --matrix: #00ff00; --bg: #0a0a0a; }
+        body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; }
+        #clock-container { padding: 40px; border: 3px solid #333; border-radius: 25px; text-align: center; background: #151515; transition: transform 0.05s cyan; z-index: 10; min-width: 350px; }
+        #time-display { font-weight: bold; font-size: clamp(40px, 12vw, 90px); margin: 10px 0; color: var(--matrix); text-shadow: 0 0 15px rgba(0,255,0,0.2); }
+        #birthday-msg { font-size: 28px; font-weight: bold; height: 40px; margin-bottom: 10px; text-transform: uppercase; }
         #countdown-display { font-size: 18px; color: #ff9f43; margin-bottom: 20px; }
-
-        .party-on {
-            border-color: var(--gold) !important;
-            background-color: #1a1608 !important;
-            box-shadow: 0 0 80px rgba(212, 175, 55, 0.4) !important;
-        }
-
+        .party-on { border-color: var(--gold) !important; background-color: #1a1608 !important; box-shadow: 0 0 80px rgba(212, 175, 55, 0.4) !important; }
         .party-on #time-display { color: var(--gold) !important; text-shadow: 0 0 25px rgba(212, 175, 55, 0.6) !important; }
-
-        .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
-        
-        input, select {
-            background: #222; color: white; border: 1px solid var(--gold);
-            padding: 8px; border-radius: 5px; font-family: inherit;
-        }
-
-        .volume-container { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 12px; color: #888; }
-
-        .toggle-btn {
-            background: #333; color: white; border: none; padding: 15px 30px;
-            font-family: inherit; font-weight: bold; border-radius: 50px;
-            cursor: pointer; transition: 0.3s; margin-top: 5px;
-        }
-
-        .btn-active { background: var(--gold); color: black; box-shadow: 0 0 20px var(--gold); }
+        .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; }
+        input { background: #222; color: white; border: 1px solid var(--gold); padding: 8px; border-radius: 5px; font-family: inherit; width: 80px; text-align: center; outline: none; }
+        .toggle-btn { background: #333; color: white; border: none; padding: 15px 30px; font-family: inherit; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; margin-top: 15px; letter-spacing: 1px; }
+        .btn-active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
+        #yt-player { position: absolute; top: -9999px; left: -9999px; visibility: hidden; pointer-events: none; }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
-        
-        .pulse { animation: pulse 0.8s infinite ease-in-out; color: var(--gold); }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .pulse { animation: pulse 0.7s infinite ease-in-out; color: var(--gold); }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
     </style>
 </head>
 <body onclick="createConfetti(event)">
 
 <canvas id="canvas"></canvas>
+
+<iframe id="yt-player" width="1" height="1" src="https://www.youtube.com/embed/S_7UvY7OidU?enablejsapi=1&autoplay=0" frameborder="0" allow="autoplay"></iframe>
 
 <div id="clock-container">
     <div id="time-display">00:00:00</div>
@@ -86,58 +35,31 @@
     <div id="countdown-display"></div>
     
     <div class="controls" onclick="event.stopPropagation()">
-        <div>Birthday: <input type="text" id="bday-input" placeholder="MM/DD" maxlength="5"></div>
-        
-        <div>
-            Track: 
-            <select id="music-select" onchange="changeMusic()">
-                <option value="">Silence</option>
-                <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Drift Phonk Style</option>
-                <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3">Aggressive Phonk</option>
-                <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3">Birthday Phonk</option>
-            </select>
-        </div>
-
-        <div class="volume-container">
-            🔈 <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" oninput="updateVolume()"> 🔊
-        </div>
-
+        <div>BIRTHDAY: <input type="text" id="bday-input" placeholder="MM/DD" maxlength="5"></div>
         <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
     </div>
 </div>
 
-<audio id="bg-music" loop></audio>
-
 <script>
     let partyMode = false;
     const bdayInput = document.getElementById('bday-input');
-    const audio = document.getElementById('bg-music');
-    const musicSelect = document.getElementById('music-select');
-    const volSlider = document.getElementById('volume-slider');
+    const player = document.getElementById('yt-player');
     
     bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
-
-    function updateVolume() { audio.volume = volSlider.value; }
-
-    function changeMusic() {
-        if (musicSelect.value) {
-            audio.src = musicSelect.value;
-            updateVolume();
-            audio.play().catch(() => console.log("Click page to play"));
-        } else {
-            audio.pause();
-        }
-    }
 
     function toggleParty() {
         partyMode = !partyMode;
         const btn = document.getElementById('party-toggle');
         const container = document.getElementById('clock-container');
+        
+        // Play/Pause YouTube
+        const command = partyMode ? '{"event":"command","func":"playVideo","args":""}' : '{"event":"command","func":"pauseVideo","args":""}';
+        player.contentWindow.postMessage(command, '*');
+
         if(partyMode) {
             container.classList.add('party-on');
             btn.classList.add('btn-active');
             btn.innerText = "STOP THE PHONK 🛑";
-            if(!audio.src) { musicSelect.selectedIndex = 1; changeMusic(); }
         } else {
             container.classList.remove('party-on');
             btn.classList.remove('btn-active');
@@ -147,6 +69,14 @@
 
     function update() {
         const now = new Date();
+        const container = document.getElementById('clock-container');
+        
+        // BASS KICK ANIMATION (Hits every second)
+        if (partyMode) {
+            container.style.transform = "scale(1.05)";
+            setTimeout(() => { container.style.transform = "scale(1)"; }, 80);
+        }
+
         document.getElementById('time-display').innerText = now.toLocaleTimeString('en-GB');
         const currentMMDD = (now.getMonth() + 1).toString().padStart(2, '0') + '/' + now.getDate().toString().padStart(2, '0');
         const userBday = bdayInput.value;
@@ -156,10 +86,8 @@
         if (currentMMDD === userBday) {
             msgArea.innerText = "🎂 HAPPY BIRTHDAY! 🎂";
             msgArea.classList.add('pulse');
-            countArea.innerText = "PHONK DAY IS HERE";
-            document.getElementById('clock-container').classList.add('party-on');
         } else {
-            msgArea.innerText = partyMode ? "🎉 PARTY TIME! 🎉" : "";
+            msgArea.innerText = partyMode ? "PASO BEM SOLTO" : "";
             if(partyMode) msgArea.classList.add('pulse');
             else msgArea.classList.remove('pulse');
 
@@ -172,7 +100,7 @@
                 const hrs = Math.floor((diff / 3600000) % 24);
                 const mins = Math.floor((diff / 60000) % 60);
                 const secs = Math.floor((diff / 1000) % 60);
-                countArea.innerText = `PHONK STARTS IN: ${days}d ${hrs}h ${mins}m ${secs}s`;
+                countArea.innerText = `PHONK BEGINS: ${days}d ${hrs}h ${mins}m ${secs}s`;
             }
         }
     }
@@ -184,20 +112,19 @@
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.onresize = resize; resize();
     function createConfetti(e) {
-        if(audio.paused && musicSelect.value) audio.play();
-        for(let i=0; i<12; i++) {
+        for(let i=0; i<20; i++) {
             particles.push({
                 x: e.clientX, y: e.clientY,
-                vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15,
-                size: Math.random()*7+2, color: i % 2 === 0 ? '#d4af37' : '#ffffff',
-                r: Math.random()*360, sp: Math.random()*15-7
+                vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20,
+                size: Math.random()*10+2, color: i % 2 === 0 ? '#d4af37' : '#ffffff',
+                r: Math.random()*360, sp: Math.random()*25-12
             });
         }
     }
     function animate() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
         particles.forEach((p,i) => {
-            p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.r += p.sp;
+            p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.r += p.sp;
             ctx.fillStyle = p.color;
             ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r*Math.PI/180);
             ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size); ctx.restore();
