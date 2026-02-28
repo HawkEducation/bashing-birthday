@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashing Birthday - Phonk Edition</title>
+    <title>Bashing Birthday - Phonk Mode</title>
     <style>
         :root { --gold: #d4af37; --matrix: #00ff00; --bg: #0a0a0a; }
         body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; }
@@ -17,7 +17,7 @@
         input { background: #222; color: white; border: 1px solid var(--gold); padding: 8px; border-radius: 5px; font-family: inherit; width: 100px; text-align: center; margin: 0 auto; outline: none; }
         .toggle-btn { background: #333; color: white; border: none; padding: 15px 30px; font-family: inherit; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; font-size: 14px; letter-spacing: 1px; }
         .btn-active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
-        #player-container { position: fixed; bottom: 15px; right: 15px; width: 200px; height: 112px; border: 2px solid var(--gold); border-radius: 12px; overflow: hidden; z-index: 100; }
+        #player-container { position: fixed; bottom: 15px; right: 15px; width: 220px; height: 125px; border: 2px solid var(--gold); border-radius: 12px; overflow: hidden; z-index: 100; background: #000; }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
         .pulse { animation: pulse 0.7s infinite ease-in-out; color: var(--gold); }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -28,7 +28,7 @@
 <canvas id="canvas"></canvas>
 
 <div id="player-container">
-    <div id="player"></div>
+    <iframe id="main-player" width="220" height="125" src="https://www.youtube.com/embed/S_7UvY7OidU?enablejsapi=1&origin=https://hawkeducation.github.io" frameborder="0" allow="autoplay; encrypted-media"></iframe>
 </div>
 
 <div id="clock-container">
@@ -39,33 +39,14 @@
         <label style="font-size: 10px; color: #666;">BIRTHDAY (MM/DD)</label>
         <input type="text" id="bday-input" placeholder="03/03" maxlength="5">
         <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
+        <div style="font-size: 9px; color: #444; margin-top: 5px;">Music stuck? Tap the video window!</div>
     </div>
 </div>
 
 <script>
     let partyMode = false;
-    let player;
     const bdayInput = document.getElementById('bday-input');
-
-    // 1. Load YouTube API
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            height: '112',
-            width: '200',
-            videoId: 'S_7UvY7OidU', // Paso Bem Solto
-            playerVars: { 'autoplay': 0, 'controls': 1, 'enablejsapi': 1 },
-            events: { 'onReady': onPlayerReady }
-        });
-    }
-
-    function onPlayerReady(event) {
-        console.log("Player Ready");
-    }
+    const player = document.getElementById('main-player');
 
     bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
     bdayInput.oninput = () => { if(bdayInput.value.length === 5) localStorage.setItem('userBirthday', bdayInput.value); };
@@ -76,12 +57,13 @@
         const container = document.getElementById('clock-container');
         
         if(partyMode) {
-            player.playVideo();
+            // Sends the play command to the iframe
+            player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
             container.classList.add('party-on');
             btn.classList.add('btn-active');
             btn.innerText = "STOP THE PHONK 🛑";
         } else {
-            player.pauseVideo();
+            player.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
             container.classList.remove('party-on');
             btn.classList.remove('btn-active');
             btn.innerText = "ACTIVATE PHONK 😈";
