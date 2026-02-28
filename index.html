@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashing Birthday - Scratch Mode</title>
+    <title>Bashing Birthday - Scratch Edition</title>
     <style>
         :root { --gold: #d4af37; --matrix: #00ff00; --bg: #0a0a0a; }
         body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; }
@@ -12,6 +12,7 @@
             padding: 40px; border: 3px solid #333; border-radius: 25px; 
             text-align: center; background: #151515; transition: all 0.1s ease; 
             z-index: 10; min-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
         }
 
         #time-display { font-weight: bold; font-size: clamp(40px, 12vw, 85px); margin: 10px 0; color: var(--matrix); text-shadow: 0 0 15px rgba(0,255,0,0.2); }
@@ -22,6 +23,11 @@
 
         .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 15px; }
         
+        #scratch-area {
+            width: 100%; height: 80px; border-radius: 10px; overflow: hidden;
+            margin-bottom: 15px; border: 1px solid #444;
+        }
+
         input[type="text"] { background: #222; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; font-family: inherit; width: 100px; text-align: center; margin: 0 auto; outline: none; }
         
         .toggle-btn { 
@@ -32,34 +38,31 @@
 
         .btn-active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
-        .small-note { font-size: 10px; color: #555; margin-top: 5px; }
     </style>
 </head>
 <body onclick="createConfetti(event)">
 
 <canvas id="canvas"></canvas>
 
-<audio id="phonk-audio" loop crossorigin="anonymous">
-    <source src="https://assets.scratch.mit.edu/internalapi/asset/709145601289133b6680370000000000.wav/get/" type="audio/wav">
-</audio>
-
 <div id="clock-container">
+    <div id="scratch-area">
+        <iframe src="https://scratch.mit.edu/projects/1167268640/embed" allowtransparency="true" width="100%" height="80" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    </div>
+
     <div id="time-display">00:00:00</div>
-    <div id="msg-area">SCRATCH MODE ACTIVE</div>
+    <div id="msg-area">READY TO BASH</div>
     
     <div class="controls" onclick="event.stopPropagation()">
         <input type="text" id="bday-input" placeholder="03/03" maxlength="5">
-        <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
-        <div class="small-note">Click background once if silent!</div>
+        <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">VISUAL MODE 😈</button>
+        <div style="font-size: 10px; color: #666; margin-top: 5px;">Click the Green Flag inside the Scratch box to start the beat!</div>
     </div>
 </div>
 
 <script>
     let partyMode = false;
-    const audio = document.getElementById('phonk-audio');
     const bdayInput = document.getElementById('bday-input');
 
-    // Load saved birthday
     bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
     bdayInput.oninput = () => { if(bdayInput.value.length === 5) localStorage.setItem('userBirthday', bdayInput.value); };
 
@@ -69,22 +72,19 @@
         const container = document.getElementById('clock-container');
         
         if(partyMode) {
-            audio.play().catch(e => console.log("User interaction needed"));
             container.classList.add('party-on');
             btn.classList.add('btn-active');
-            btn.innerText = "STOP THE PHONK 🛑";
+            btn.innerText = "PARTY ON 🛑";
         } else {
-            audio.pause();
             container.classList.remove('party-on');
             btn.classList.remove('btn-active');
-            btn.innerText = "ACTIVATE PHONK 😈";
+            btn.innerText = "VISUAL MODE 😈";
         }
     }
 
     function update() {
         const now = new Date();
         document.getElementById('time-display').innerText = now.toLocaleTimeString('en-GB');
-        
         if (partyMode) {
             document.getElementById('clock-container').style.transform = "scale(1.05)";
             setTimeout(() => { document.getElementById('clock-container').style.transform = "scale(1)"; }, 70);
@@ -98,7 +98,6 @@
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.onresize = resize; resize();
     function createConfetti(e) {
-        if(partyMode && audio.paused) audio.play(); // Wake up audio on click
         for(let i=0; i<20; i++) {
             particles.push({
                 x: e.clientX, y: e.clientY,
