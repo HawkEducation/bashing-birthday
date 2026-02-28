@@ -6,131 +6,82 @@
     <title>Bashing Birthday - Phonk Edition</title>
     <style>
         :root { --gold: #d4af37; --matrix: #00ff00; --bg: #0a0a0a; }
-        
-        body { 
-            background-color: var(--bg); 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            font-family: 'Courier New', monospace; 
-            overflow: hidden; 
-        }
-        
-        #clock-container { 
-            padding: 40px; border: 3px solid #333; border-radius: 25px; 
-            text-align: center; background: #151515; transition: all 0.1s ease; 
-            z-index: 10; min-width: 380px; position: relative;
-        }
-
-        #time-display { 
-            font-weight: bold; font-size: clamp(40px, 12vw, 85px); 
-            margin: 10px 0; color: var(--matrix); 
-            text-shadow: 0 0 15px rgba(0,255,0,0.2); 
-        }
-
+        body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; }
+        #clock-container { padding: 40px; border: 3px solid #333; border-radius: 25px; text-align: center; background: #151515; transition: all 0.1s ease; z-index: 10; min-width: 380px; position: relative; }
+        #time-display { font-weight: bold; font-size: clamp(40px, 12vw, 85px); margin: 10px 0; color: var(--matrix); text-shadow: 0 0 15px rgba(0,255,0,0.2); }
         #msg-area { font-size: 26px; font-weight: bold; height: 40px; margin-bottom: 10px; text-transform: uppercase; }
         #countdown-display { font-size: 16px; color: #ff9f43; margin-bottom: 20px; }
-
-        .party-on { 
-            border-color: var(--gold) !important; 
-            background-color: #1a1608 !important; 
-            box-shadow: 0 0 80px rgba(212, 175, 55, 0.4) !important; 
-        }
-        
-        .party-on #time-display { 
-            color: var(--gold) !important; 
-            text-shadow: 0 0 25px rgba(212, 175, 55, 0.6) !important; 
-        }
-
-        .controls { 
-            margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; 
-            display: flex; flex-direction: column; gap: 12px; 
-        }
-        
-        input { 
-            background: #222; color: white; border: 1px solid var(--gold); 
-            padding: 8px; border-radius: 5px; font-family: inherit; 
-            width: 100px; text-align: center; margin: 0 auto; outline: none;
-        }
-
-        .toggle-btn { 
-            background: #333; color: white; border: none; padding: 15px 30px; 
-            font-family: inherit; font-weight: bold; border-radius: 50px; 
-            cursor: pointer; transition: 0.3s; font-size: 14px; letter-spacing: 1px;
-        }
-
+        .party-on { border-color: var(--gold) !important; background-color: #1a1608 !important; box-shadow: 0 0 80px rgba(212, 175, 55, 0.4) !important; }
+        .party-on #time-display { color: var(--gold) !important; text-shadow: 0 0 25px rgba(212, 175, 55, 0.6) !important; }
+        .controls { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 12px; }
+        input { background: #222; color: white; border: 1px solid var(--gold); padding: 8px; border-radius: 5px; font-family: inherit; width: 100px; text-align: center; margin: 0 auto; outline: none; }
+        .toggle-btn { background: #333; color: white; border: none; padding: 15px 30px; font-family: inherit; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; font-size: 14px; letter-spacing: 1px; }
         .btn-active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
-        
-        /* Mini Player for Chrome/YT bypass */
-        #yt-player { 
-            position: fixed; bottom: 15px; right: 15px; 
-            width: 200px; height: 112px; border-radius: 12px; 
-            z-index: 100; border: 2px solid var(--gold); 
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-        }
-
+        #player-container { position: fixed; bottom: 15px; right: 15px; width: 200px; height: 112px; border: 2px solid var(--gold); border-radius: 12px; overflow: hidden; z-index: 100; }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
-        
         .pulse { animation: pulse 0.7s infinite ease-in-out; color: var(--gold); }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        
-        .instruction { font-size: 10px; color: #555; margin-top: 10px; }
     </style>
 </head>
 <body onclick="createConfetti(event)">
 
 <canvas id="canvas"></canvas>
 
-<iframe id="yt-player" 
-    src="https://www.youtube.com/embed/S_7UvY7OidU?enablejsapi=1" 
-    frameborder="0" 
-    allow="autoplay">
-</iframe>
+<div id="player-container">
+    <div id="player"></div>
+</div>
 
 <div id="clock-container">
     <div id="time-display">00:00:00</div>
     <div id="msg-area">READY TO BASH</div>
     <div id="countdown-display">SET BIRTHDAY BELOW</div>
-    
     <div class="controls" onclick="event.stopPropagation()">
         <label style="font-size: 10px; color: #666;">BIRTHDAY (MM/DD)</label>
         <input type="text" id="bday-input" placeholder="03/03" maxlength="5">
-        
         <button id="party-toggle" class="toggle-btn" onclick="toggleParty()">ACTIVATE PHONK 😈</button>
-        <div class="instruction">If silent, click play on the mini-video!</div>
     </div>
 </div>
 
 <script>
     let partyMode = false;
+    let player;
     const bdayInput = document.getElementById('bday-input');
-    const playerFrame = document.getElementById('yt-player');
-    
-    // Load saved birthday
-    bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
 
-    bdayInput.oninput = () => {
-        if(bdayInput.value.length === 5) {
-            localStorage.setItem('userBirthday', bdayInput.value);
-        }
-    };
+    // 1. Load YouTube API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            height: '112',
+            width: '200',
+            videoId: 'S_7UvY7OidU', // Paso Bem Solto
+            playerVars: { 'autoplay': 0, 'controls': 1, 'enablejsapi': 1 },
+            events: { 'onReady': onPlayerReady }
+        });
+    }
+
+    function onPlayerReady(event) {
+        console.log("Player Ready");
+    }
+
+    bdayInput.value = localStorage.getItem('userBirthday') || "03/03";
+    bdayInput.oninput = () => { if(bdayInput.value.length === 5) localStorage.setItem('userBirthday', bdayInput.value); };
 
     function toggleParty() {
         partyMode = !partyMode;
         const btn = document.getElementById('party-toggle');
         const container = document.getElementById('clock-container');
-        const win = playerFrame.contentWindow;
         
         if(partyMode) {
-            win.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            player.playVideo();
             container.classList.add('party-on');
             btn.classList.add('btn-active');
             btn.innerText = "STOP THE PHONK 🛑";
         } else {
-            win.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            player.pauseVideo();
             container.classList.remove('party-on');
             btn.classList.remove('btn-active');
             btn.innerText = "ACTIVATE PHONK 😈";
@@ -140,15 +91,11 @@
     function update() {
         const now = new Date();
         const container = document.getElementById('clock-container');
-        
-        // Visual Bass Kick Effect
         if (partyMode) {
             container.style.transform = "scale(1.05)";
             setTimeout(() => { container.style.transform = "scale(1)"; }, 70);
         }
-
         document.getElementById('time-display').innerText = now.toLocaleTimeString('en-GB');
-        
         const currentMMDD = (now.getMonth() + 1).toString().padStart(2, '0') + '/' + now.getDate().toString().padStart(2, '0');
         const userBday = bdayInput.value;
         const msgArea = document.getElementById('msg-area');
@@ -158,16 +105,10 @@
             msgArea.innerText = "🎂 HAPPY BIRTHDAY! 🎂";
             msgArea.classList.add('pulse');
             countArea.innerText = "PHONK DAY IS LIVE";
-            if (!partyMode && !localStorage.getItem('autoStarted')) {
-                toggleParty();
-                localStorage.setItem('autoStarted', 'true');
-            }
         } else {
-            localStorage.removeItem('autoStarted');
             msgArea.innerText = partyMode ? "PASO BEM SOLTO" : "BASHING SOON";
             if(partyMode) msgArea.classList.add('pulse');
             else msgArea.classList.remove('pulse');
-
             if(userBday.length === 5) {
                 const [m, d] = userBday.split('/');
                 let target = new Date(now.getFullYear(), m-1, d);
@@ -182,17 +123,13 @@
         }
     }
 
-    // --- CONFETTI ENGINE ---
+    // --- CONFETTI ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.onresize = resize; resize();
-    
     function createConfetti(e) {
-        // One more attempt to wake up audio on click
-        if(partyMode) playerFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        
         for(let i=0; i<20; i++) {
             particles.push({
                 x: e.clientX, y: e.clientY,
@@ -202,7 +139,6 @@
             });
         }
     }
-    
     function animate() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
         particles.forEach((p,i) => {
@@ -214,7 +150,6 @@
         });
         requestAnimationFrame(animate);
     }
-
     setInterval(update, 1000);
     update();
     animate();
